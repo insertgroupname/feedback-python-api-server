@@ -1,3 +1,4 @@
+from typing import final
 from flask import (
     Flask,
     request,
@@ -18,11 +19,15 @@ app = Flask(__name__)
 def convert_sound():
     errors = []
     filename = ""
+    sound_ = ""
     try:
         filename = request.args.get("file_name")
         sound_ = extractor(filename)
     except:
         errors.append("Unable to get URL. Please make sure it's valid and try again.")
+    # finally:
+    #     filename = request.args.get("file_name")
+    #     sound_ = extractor(filename)
     return f"filename is {sound_}"
 
 
