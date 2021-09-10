@@ -9,6 +9,8 @@ requests = "*"
 moviepy = "*"
 ibm-watson = "*"
 pymongo = "*"
+spacy = "*"
+nltk = "*"
 
 [dev-packages]
 black = "*"
