@@ -6,7 +6,7 @@ from flask import (
 )
 import requests
 from extract_audio import extractor
-
+from module.process import process 
 app = Flask(__name__)
 
 
@@ -18,17 +18,18 @@ app = Flask(__name__)
 @app.route("/convert_sound", methods=["POST"])
 def convert_sound():
     errors = []
-    filename = ""
-    sound_ = ""
+    videoUUID = ""
+    soundUUID = ""
     try:
-        filename = request.args.get("file_name")
-        sound_ = extractor(filename)
+        videoUUID = request.args.get("file_name")
+        soundUUID = extractor(videoUUID)
     except:
         errors.append("Unable to get URL. Please make sure it's valid and try again.")
     # finally:
     #     filename = request.args.get("file_name")
     #     sound_ = extractor(filename)
-    return f"filename is {sound_}"
+    process(videoUUID, soundUUID)
+    return f"result modified "
 
 
 @app.route("/nlp", methods=["POST"])
