@@ -34,7 +34,7 @@ def get_transcript(audio_name: str):
                                 'timestamps': alt['timestamps'],
                                 'word_confidence': alt['word_confidence'],
                             }))
-                transcriptObj = dict( { 'result':lists } )
+                transcriptObj = dict( { 'results':lists } )
                 json.dump( transcriptObj , file, indent=4 )
 		        
         except Exception as e:

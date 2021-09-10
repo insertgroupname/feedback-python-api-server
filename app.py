@@ -6,7 +6,7 @@ from flask import (
 )
 import requests
 from extract_audio import extractor
-from module.process import process
+from module.process import process_transcript
 from module.nlp import process_nlp
 
 app = Flask(__name__)
@@ -30,9 +30,8 @@ def convert_sound():
     # finally:
     #     filename = request.args.get("file_name")
     #     sound_ = extractor(filename)
-    process(videoUUID, soundUUID)
+    process_transcript(videoUUID, soundUUID)
     nlp_res = process_nlp(videoUUID)
-    process(videoUUID, nlp_res)
     return f"result modified "
 
 

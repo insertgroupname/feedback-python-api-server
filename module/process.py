@@ -1,7 +1,7 @@
 from module.db import Database
 import module.ibm_watson_stt as stt
 
-def process(videoUUID: str, soundUUID: str):
+def process_transcript(videoUUID: str, soundUUID: str):
   sttResult = stt.get_transcript(soundUUID)
   db = Database()
   queryObj = { "videoUUID" : videoUUID }

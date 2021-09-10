@@ -14,7 +14,7 @@ def read_json(path):
 def create_textFromList(list_):
     text_list = ""
     for i, v in enumerate(list_["results"]):
-        text_list = text_list + " " + v["alternatives"][0]["transcript"]
+        text_list = text_list + " " + v["transcript"]
     return text_list
 
 

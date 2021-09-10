@@ -5,14 +5,15 @@ import argparse
 import json
 import spacy
 from collections import Counter
-import text_processor as tp
+import module.text_processor as tp
 import time
+from module.db import Database
 
 
-def process_nlp(filename):
+def process_nlp(videoUUID):
     start_process_time = time.time()
-    filename = filename.split(".")[0]
-    transcript_path = os.path.join("trancript", filename)
+    filename = videoUUID.split(".")[0]+".json"
+    transcript_path = os.path.join("transcript", filename)
     file_ = tp.read_json(transcript_path)
 
     text_list = tp.create_textFromList(file_)
@@ -25,7 +26,7 @@ def process_nlp(filename):
 
     wpm_list = []
     for i, v in enumerate(file_["results"]):
-        list_ = v["alternatives"][0]["timestamps"]
+        list_ = v["timestamps"]
         for i in list_:
             wpm_list.append(i)
 
@@ -73,4 +74,7 @@ def process_nlp(filename):
     output_json["start_process_time"] = start_process_time
     output_json["end_process_time"] = time.time()
 
+    db = Database()
+    queryObj = { "videoUUID" : videoUUID }
+    db.update(queryObj, { "postProcessing" : output_json})
     return output_json
