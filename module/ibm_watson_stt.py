@@ -1,20 +1,26 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 def get_transcript(audio_name: str):
+    print(f"into transcript\n")
     import os, io
     import json
     import logging, traceback
-    from typing import final
     
     from ibm_watson import SpeechToTextV1
     from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
+    
 
     authenticator = IAMAuthenticator(os.environ['IBM_API_KEY'])
     speech_to_text = SpeechToTextV1(
         authenticator=authenticator
     )
+    print("got token")
     url = os.environ["IBM_URL_STT"]
     speech_to_text.set_service_url(url)
-    
-    with io.open( os.path.join( "../Feedback/upload/audio", audio_name ), "rb" ) as audio_file:
+    print("set url")
+    with io.open( os.path.join( "../feedback-node-server/upload/audio", audio_name ), "rb" ) as audio_file:
+        print("transforming")
         output = speech_to_text.recognize(
             audio_file, 
             content_type='audio/wav',
@@ -40,4 +46,5 @@ def get_transcript(audio_name: str):
         except Exception as e:
             logging.error(traceback.format_exc())
         finally:
+            print("transcript done\n")
             return transcriptObj

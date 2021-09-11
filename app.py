@@ -12,9 +12,9 @@ from module.nlp import process_nlp
 app = Flask(__name__)
 
 
-# @app.route("/")
-# def index():
-#     return "Hello world"
+@app.route("/")
+def index():
+    return "Hello world"
 
 
 @app.route("/convert_sound", methods=["POST"])
@@ -24,16 +24,15 @@ def convert_sound():
     soundUUID = ""
     try:
         videoUUID = request.args.get("file_name")
-        soundUUID = extractor(videoUUID)
+        return f"result modified "
     except:
         errors.append("Unable to get URL. Please make sure it's valid and try again.")
-    # finally:
-    #     filename = request.args.get("file_name")
-    #     sound_ = extractor(filename)
-    process_transcript(videoUUID, soundUUID)
-    nlp_res = process_nlp(videoUUID)
-    return f"result modified "
-
+    finally:
+        soundUUID = extractor(videoUUID)
+        print(f"soundUUID {soundUUID}")
+        print(f"videoUUID {videoUUID}")
+        process_transcript(videoUUID, soundUUID)
+        nlp_res = process_nlp(videoUUID)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0", port=5000)

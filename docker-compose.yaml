@@ -1,0 +1,25 @@
+version: "3.8"
+
+services: 
+  pythonserver:
+    build: .
+    hostname: python-server
+    volumes:
+      - type: bind
+        source: ../feedback-node-server/upload
+        target: /usr/app/upload
+      
+      - type: bind
+        source: .
+        target: /usr/app/
+    
+    restart: 'unless-stopped'
+    networks:
+      - python-backend
+    ports:
+      - 5000:5000
+
+networks:
+  python-backend:
+    external:
+      name: custom-backend
