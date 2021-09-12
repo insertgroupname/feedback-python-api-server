@@ -12,7 +12,7 @@ from module.db import Database
 
 def process_nlp(videoUUID):
     start_process_time = time.time()
-    filename = videoUUID.split(".")[0]+".json"
+    filename = videoUUID.split(".")[0] + ".json"
     transcript_path = os.path.join("transcript", filename)
     file_ = tp.read_json(transcript_path)
 
@@ -24,12 +24,14 @@ def process_nlp(videoUUID):
     for i in hes_txt_:
         t = t + " " + i
 
+    # Concat every words in every chunks
     wpm_list = []
     for i, v in enumerate(file_["results"]):
         list_ = v["timestamps"]
         for i in list_:
             wpm_list.append(i)
 
+    # Count WPM
     wpm_dict = {}
     for i in range(0, int(wpm_list[-1][2] + 1), 60):
         wpm_dict[f"{i}-{i+60}"] = {"wpm": 0, "words": []}
@@ -38,9 +40,9 @@ def process_nlp(videoUUID):
                 wpm_dict[f"{i}-{i+60}"]["words"].append(v)
         wpm_dict[f"{i}-{i+60}"]["wpm"] = len(wpm_dict[f"{i}-{i+60}"]["words"])
 
+    # Count Silence Period
     silence_list = []
     for i, v in enumerate(wpm_list):
-        # Count Silence Period
         if i == len(wpm_list) - 1:
             break
         if v[2] != wpm_list[i + 1][1]:
@@ -51,6 +53,16 @@ def process_nlp(videoUUID):
                 "silence_end": wpm_list[i + 1][1],
             }
             silence_list.append(e)
+
+    hestiation_marker = {}
+    for i in range(0, int(wpm_list[-1][2] + 1), 10):
+        hestiation_marker[f"{i}-{i+10.0}"] = {"hes_count": 0, "words": []}
+        for j, v in enumerate(wpm_list):
+            if ((v[2] > i) and (v[2] < i + 10.0)) and v[0] == "%HESITATION":
+                hestiation_marker[f"{i}-{i+10.0}"]["words"].append(v)
+                hestiation_marker[f"{i}-{i+10.0}"]["hes_count"] = len(
+                    hestiation_marker[f"{i}-{i+10.0}"]["words"]
+                )
 
     nlp = spacy.load("en_core_web_lg")
     doc_ = nlp(t)
@@ -64,7 +76,7 @@ def process_nlp(videoUUID):
     bigram_fd = nltk.FreqDist(nltk.bigrams(txt_rm_stop))
 
     output_json["hestiation_"] = {"marker": {}, "total_count": {}}
-    # output_json["hestiation_"]["marker"] = hes_txt_
+    output_json["hestiation_"]["marker"] = hestiation_marker
     output_json["hestiation_"]["total_count"] = hes_cnt
     output_json["word_frequency"] = {"word": {}, "bigram": {}}
     output_json["word_frequency"]["word"] = words_fd.most_common(15)
@@ -75,6 +87,6 @@ def process_nlp(videoUUID):
     output_json["end_process_time"] = time.time()
 
     db = Database()
-    queryObj = { "videoUUID" : videoUUID }
-    db.update(queryObj, { "postProcessing" : output_json})
+    queryObj = {"videoUUID": videoUUID}
+    db.update(queryObj, {"postProcessing": output_json})
     return output_json
