@@ -85,6 +85,8 @@ def process_nlp(videoUUID):
     output_json["silence"] = silence_list
     output_json["start_process_time"] = start_process_time
     output_json["end_process_time"] = time.time()
+    output_json["video_len"] = wpm_list[-1][2]
+    output_json["total_words"] = len(wpm_list)
 
     db = Database()
     queryObj = {"videoUUID": videoUUID}
