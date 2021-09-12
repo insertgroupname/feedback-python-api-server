@@ -1,7 +1,7 @@
 import moviepy.editor as mp
 
 def extractor(videoUUID):
-    path = "../feedback-node-server/upload/"
+    path = "upload/"
     try:
         video = mp.VideoFileClip(path+"video/"+videoUUID)
         output_filename = videoUUID.split(".")[0] + ".wav"

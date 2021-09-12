@@ -19,7 +19,7 @@ def get_transcript(audio_name: str):
     url = os.environ["IBM_URL_STT"]
     speech_to_text.set_service_url(url)
     print("set url")
-    with io.open( os.path.join( "../feedback-node-server/upload/audio", audio_name ), "rb" ) as audio_file:
+    with io.open( os.path.join( "upload/audio", audio_name ), "rb" ) as audio_file:
         print("transforming")
         output = speech_to_text.recognize(
             audio_file, 

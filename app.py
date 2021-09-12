@@ -8,7 +8,7 @@ import requests
 from extract_audio import extractor
 from module.process import process_transcript
 from module.nlp import process_nlp
-
+import os
 app = Flask(__name__)
 
 
@@ -35,4 +35,4 @@ def convert_sound():
         nlp_res = process_nlp(videoUUID)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=os.environ["PORT"])

@@ -16,8 +16,8 @@ services:
     restart: 'unless-stopped'
     networks:
       - python-backend
-    ports:
-      - 5000:5000
+    # ports:
+    #   - 5000:5000
 
 networks:
   python-backend:
