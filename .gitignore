@@ -1,6 +1,6 @@
 # custom
-transcript/*
-
+transcript/*.*
+upload
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
