@@ -38,7 +38,7 @@ def process_nlp(videoUUID):
     total = 0
     for i in range(0, int(wpm_list[-1][2] + 1), 60):
         wpm_dict[f"{i}-{i+60}"] = {"wpm": 0, "words": []}
-        count_min +=1
+        count_min += 1
         for j, v in enumerate(wpm_list):
             if (v[2] > i) & (v[2] < i + 60):
                 wpm_dict[f"{i}-{i+60}"]["words"].append(v)
@@ -48,6 +48,8 @@ def process_nlp(videoUUID):
     avg_wpm = total / count_min
 
     # Count Silence Period
+    silence_dict = {"total_silence": 0, "silence_list": []}
+    silence_duration_count = 0
     silence_list = []
     for i, v in enumerate(wpm_list):
         if i == len(wpm_list) - 1:
@@ -59,6 +61,7 @@ def process_nlp(videoUUID):
                 "silence_start": v[2],
                 "silence_end": wpm_list[i + 1][1],
             }
+            silence_duration_count += silence_time
             silence_list.append(e)
 
     hestiation_marker = {}
@@ -89,7 +92,9 @@ def process_nlp(videoUUID):
     output_json["word_frequency"]["word"] = words_fd.most_common(15)
     output_json["word_frequency"]["bigram"] = bigram_fd.most_common(10)
     output_json["wpm"] = wpm_dict
-    output_json["silence"] = silence_list
+    silence_dict["silence_list"] = silence_list
+    silence_dict["total_silence"] = silence_duration_count
+    output_json["silence"] = silence_dict
     output_json["start_process_time"] = start_process_time
     output_json["end_process_time"] = time.time()
     output_json["video_len"] = wpm_list[-1][2]
