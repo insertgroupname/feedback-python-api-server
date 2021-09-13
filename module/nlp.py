@@ -64,14 +64,29 @@ def process_nlp(videoUUID):
             silence_duration_count += silence_time
             silence_list.append(e)
 
-    hestiation_marker = {}
-    for i in range(0, int(wpm_list[-1][2] + 1), 10):
-        hestiation_marker[f"{i}-{i+10.0}"] = {"hes_count": 0, "words": []}
+    # hestiation_marker = {}
+    # for i in range(0, int(wpm_list[-1][2] + 1), 10):
+    #     hestiation_marker[f"{i}-{i+10.0}"] = {"hes_count": 0, "words": []}
+    #     for j, v in enumerate(wpm_list):
+    #         if ((v[2] > i) and (v[2] < i + 10.0)) and v[0] == "%HESITATION":
+    #             hestiation_marker[f"{i}-{i+10.0}"]["words"].append(v)
+    #             hestiation_marker[f"{i}-{i+10.0}"]["hes_count"] = len(
+    #                 hestiation_marker[f"{i}-{i+10.0}"]["words"]
+    #             )
+
+    chunk = round((wpm_list[-1][2]) / 10, ndigits=2)
+    last_chunk = round((wpm_list[-1][2]), ndigits=2)
+    value = 0
+    hes_dict = {}
+    while value <= last_chunk:
+        temp = value
+        value += chunk
+        hes_dict[f"{temp}-{value}"] = {"hes_count": 0, "words": []}
         for j, v in enumerate(wpm_list):
-            if ((v[2] > i) and (v[2] < i + 10.0)) and v[0] == "%HESITATION":
-                hestiation_marker[f"{i}-{i+10.0}"]["words"].append(v)
-                hestiation_marker[f"{i}-{i+10.0}"]["hes_count"] = len(
-                    hestiation_marker[f"{i}-{i+10.0}"]["words"]
+            if ((v[2] > temp) and (v[2] < value)) and v[0] == "%HESITATION":
+                hes_dict[f"{temp}-{value}"]["words"].append(v)
+                hes_dict[f"{temp}-{value}"]["hes_count"] = len(
+                    hes_dict[f"{temp}-{value}"]["words"]
                 )
 
     nlp = spacy.load("en_core_web_lg")
@@ -117,7 +132,7 @@ def process_nlp(videoUUID):
                     keyword_list.add(i.lemma_)
 
     output_json["hestiation_"] = {"marker": {}, "total_count": {}}
-    output_json["hestiation_"]["marker"] = hestiation_marker
+    output_json["hestiation_"]["marker"] = hes_dict
     output_json["hestiation_"]["total_count"] = hes_cnt
     output_json["word_frequency"] = {"word": {}, "bigram": {}}
     output_json["word_frequency"]["word"] = keyword_
