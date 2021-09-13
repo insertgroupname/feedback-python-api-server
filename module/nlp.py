@@ -33,12 +33,18 @@ def process_nlp(videoUUID):
 
     # Count WPM
     wpm_dict = {}
+    avg_wpm = 0
+    count_min = 0
+    total = 0
     for i in range(0, int(wpm_list[-1][2] + 1), 60):
         wpm_dict[f"{i}-{i+60}"] = {"wpm": 0, "words": []}
         for j, v in enumerate(wpm_list):
             if (v[2] > i) & (v[2] < i + 60):
                 wpm_dict[f"{i}-{i+60}"]["words"].append(v)
         wpm_dict[f"{i}-{i+60}"]["wpm"] = len(wpm_dict[f"{i}-{i+60}"]["words"])
+        total += len(wpm_dict[f"{i}-{i+60}"]["words"])
+
+    avg_wpm = total / count_min
 
     # Count Silence Period
     silence_list = []
@@ -87,6 +93,7 @@ def process_nlp(videoUUID):
     output_json["end_process_time"] = time.time()
     output_json["video_len"] = wpm_list[-1][2]
     output_json["total_words"] = len(wpm_list)
+    output_json["avg_wpm"] = avg_wpm
 
     db = Database()
     queryObj = {"videoUUID": videoUUID}
