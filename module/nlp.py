@@ -38,6 +38,7 @@ def process_nlp(videoUUID):
     total = 0
     for i in range(0, int(wpm_list[-1][2] + 1), 60):
         wpm_dict[f"{i}-{i+60}"] = {"wpm": 0, "words": []}
+        count_min +=1
         for j, v in enumerate(wpm_list):
             if (v[2] > i) & (v[2] < i + 60):
                 wpm_dict[f"{i}-{i+60}"]["words"].append(v)
