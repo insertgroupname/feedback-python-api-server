@@ -13,3 +13,6 @@ class Database:
     result = collection.update_one(queryObj, { "$set" : updateObj })
     return result
   
+  def close(self):
+    self.client.close()
+  
