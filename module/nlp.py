@@ -82,14 +82,45 @@ def process_nlp(videoUUID):
     # run nltk.download() if there are files missing
     # nltk.download()
 
-    words_fd = nltk.FreqDist(txt_rm_stop)
+    # words_fd = nltk.FreqDist(txt_rm_stop)
     bigram_fd = nltk.FreqDist(nltk.bigrams(txt_rm_stop))
+
+    vocab_dict = {}
+    counter = 0
+    for i in doc_:
+        if i.pos_ == "NOUN":
+            if i.text in vocab_dict:
+                vocab_dict[f"{i.text}"]["count"] += 1
+            else:
+                counter += 1
+                vocab_dict[f"{i.text}"] = {"word": f"{i.text}", "count": 1}
+    unique_dict = {}
+    for i in doc_:
+        if i.lemma_ in unique_dict:
+            unique_dict[f"{i.lemma_}"]["count"] += 1
+        else:
+            counter += 1
+            print(i.lemma_)
+            unique_dict[f"{i.lemma_}"] = {"word": f"{i.lemma_}", "count": 1}
+
+    keyword_ = nltk.FreqDist(txt_rm_stop).most_common(30)
+    key_list = ""
+    for i, v in keyword_:
+        key_list = key_list + i + " "
+
+    key_doc = nlp(key_list)
+    keyword_list = set()
+    for i in key_doc:
+        for j in key_doc:
+            if (i.pos_ == "NOUN" and j.pos_ == "NOUN") and i.text != j.text:
+                if i.similarity(j) > 0.5 and i.similarity(j) != 1.0:
+                    keyword_list.add(i.lemma_)
 
     output_json["hestiation_"] = {"marker": {}, "total_count": {}}
     output_json["hestiation_"]["marker"] = hestiation_marker
     output_json["hestiation_"]["total_count"] = hes_cnt
     output_json["word_frequency"] = {"word": {}, "bigram": {}}
-    output_json["word_frequency"]["word"] = words_fd.most_common(15)
+    output_json["word_frequency"]["word"] = keyword_
     output_json["word_frequency"]["bigram"] = bigram_fd.most_common(10)
     output_json["wpm"] = wpm_dict
     silence_dict["silence_list"] = silence_list
@@ -100,6 +131,10 @@ def process_nlp(videoUUID):
     output_json["video_len"] = wpm_list[-1][2]
     output_json["total_words"] = len(wpm_list)
     output_json["avg_wpm"] = avg_wpm
+
+    output_json["vocab"] = vocab_dict
+    output_json["len_unique_word"] = len(unique_dict)
+    output_json["keyword"] = list(keyword_list)
 
     db = Database()
     queryObj = {"videoUUID": videoUUID}
