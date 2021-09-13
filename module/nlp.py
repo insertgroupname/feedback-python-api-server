@@ -95,7 +95,7 @@ def process_nlp(videoUUID):
     nlp = spacy.load("en_core_web_lg")
     doc_ = nlp(t)
     txt_rm_stop = tp.remove_all(doc_)
-    print(tp.calculate_word_frequency(nlp, text_list))
+    # print(tp.calculate_word_frequency(nlp, text_list))
 
     # run nltk.download() if there are files missing
     # nltk.download()
@@ -118,7 +118,7 @@ def process_nlp(videoUUID):
             unique_dict[f"{i.lemma_}"]["count"] += 1
         else:
             counter += 1
-            print(i.lemma_)
+            # print(i.lemma_)
             unique_dict[f"{i.lemma_}"] = {"word": f"{i.lemma_}", "count": 1}
 
     keyword_ = nltk.FreqDist(txt_rm_stop).most_common(30)
