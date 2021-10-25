@@ -13,7 +13,7 @@ import datetime
 def process_nlp(videoUUID):
     db = Database()
     queryObj = {"videoUUID": videoUUID}
-    db.update(queryObj, {"latestUpdate": datetime.datetime.today().isoformat(), "status": "processing_nlp"})
+    db.update(queryObj, {"lastUpdate": datetime.datetime.today().isoformat(), "status": "processing_nlp"})
     start_process_time = time.time()
     filename = videoUUID.split(".")[0] + ".json"
     transcript_path = os.path.join("transcript", filename)
@@ -154,6 +154,6 @@ def process_nlp(videoUUID):
     output_json["len_unique_word"] = len(unique_dict)
     output_json["keyword"] = list(keyword_list)
     
-    db.update(queryObj, {"latestUpdate": datetime.datetime.today().isoformat(), "status": "Done","postProcessing": output_json})
+    db.update(queryObj, {"lastUpdate": datetime.datetime.today().isoformat(), "status": "Done","report": { "postProcessing": output_json}})
     db.close()
     return output_json

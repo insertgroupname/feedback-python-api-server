@@ -4,11 +4,11 @@ import datetime
 def process_transcript(videoUUID: str, soundUUID: str):
   db = Database()
   queryObj = { "videoUUID" : videoUUID }
-  db.update( queryObj,{ "latestUpdate": datetime.datetime.today().isoformat() ,"status" : "processing_transcript" } )
+  db.update( queryObj,{ "lastUpdate": datetime.datetime.today().isoformat() ,"status" : "processing_transcript" } )
   print("processing through transcript...\n")
   sttResult = stt.get_transcript(soundUUID)
-  updateObj = sttResult
+  updateObj = {"report": {"transcript": sttResult["result"]}}
   updateResult = db.update(queryObj,updateObj)
-  db.update(queryObj, {"latestUpdate": datetime.datetime.today().isoformat()})
+  db.update(queryObj, {"lastUpdate": datetime.datetime.today().isoformat()})
   db.close()
   return updateResult
