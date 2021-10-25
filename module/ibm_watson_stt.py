@@ -19,11 +19,12 @@ def get_transcript(audio_name: str):
     url = os.environ["IBM_URL_STT"]
     speech_to_text.set_service_url(url)
     print("set url")
+    ext = audio_name.split(".")[1]
     with io.open( os.path.join( "upload/audio", audio_name ), "rb" ) as audio_file:
         print("transforming")
         output = speech_to_text.recognize(
             audio_file, 
-            content_type='audio/wav',
+            content_type='audio/'+ext,
             model='en-US_NarrowbandModel',
             word_confidence=True,
             timestamps=True,
