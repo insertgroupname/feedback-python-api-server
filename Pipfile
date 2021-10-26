@@ -8,9 +8,10 @@ flask = "*"
 requests = "*"
 moviepy = "*"
 ibm-watson = "*"
-pymongo = "*"
+pymongo = {extras = ["srv"], version = "*"}
 spacy = "*"
 nltk = "*"
+python-dotenv = "*"
 
 [dev-packages]
 black = "*"
