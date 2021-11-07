@@ -32,7 +32,7 @@ def convert_sound():
         print(f"soundUUID {soundUUID}")
         print(f"videoUUID {videoUUID}")
         process_transcript(videoUUID, soundUUID)
-        nlp_res = process_nlp(videoUUID)
+        nlp_res = process_nlp(videoUUID,soundUUID)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=os.environ["PORT"])

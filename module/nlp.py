@@ -10,10 +10,20 @@ import time
 from module.db import Database
 import datetime
 
-def process_nlp(videoUUID):
+
+def process_nlp(videoUUID, soundUUID):
     db = Database()
     queryObj = {"videoUUID": videoUUID}
-    db.update(queryObj, {"latestUpdate": datetime.datetime.today().isoformat(), "status": "processing_nlp"})
+    db.update(
+        queryObj,
+        {
+            "latestUpdate": datetime.datetime.today().isoformat(),
+            "status": "processing_nlp",
+        },
+    )
+    result = db.find({"videoUUID": f"{videoUUID}"}, {"userId": 1})
+    result_2 = db.findUserById(result[0]["userId"])
+
     start_process_time = time.time()
     filename = videoUUID.split(".")[0] + ".json"
     transcript_path = os.path.join("transcript", filename)
@@ -21,6 +31,19 @@ def process_nlp(videoUUID):
 
     text_list = tp.create_textFromList(file_)
     hes_cnt, hes_txt_ = tp.count_hestiation(text_list)
+
+    # From Pre-trained STT model;f"{path}audio/{output_filename_ogg}"
+    another_stt = tp.stt(f"upload/audio/{soundUUID}")
+    repeat_list = []
+    prev = ""
+    for i in another_stt.split():
+        if i == prev:
+            if i in repeat_list:
+                repeat_list[f"{i}"] += 1
+            else:
+                repeat_list[f"{i}"] = 1
+        else:
+            prev = i
 
     output_json = {}
     t = ""
@@ -59,11 +82,12 @@ def process_nlp(videoUUID):
             break
         if v[2] != wpm_list[i + 1][1]:
             silence_time = wpm_list[i + 1][1] - v[2]
-            e = {
-                "silence_period": silence_time,
-                "silence_start": v[2],
-                "silence_end": wpm_list[i + 1][1],
-            }
+            if silence_time > 0.3:  # Can be custom
+                e = {
+                    "silence_period": round(silence_time, ndigits=5),
+                    "silence_start": v[2],
+                    "silence_end": wpm_list[i + 1][1],
+                }
             silence_duration_count += silence_time
             silence_list.append(e)
 
@@ -94,7 +118,8 @@ def process_nlp(videoUUID):
 
     nlp = spacy.load("en_core_web_lg")
     doc_ = nlp(t)
-    txt_rm_stop = tp.remove_all(doc_)
+    receive_stopword = result_2[0]["stopwords"]
+    txt_rm_stop = tp.remove_all(doc_, receive_stopword)
     # print(tp.calculate_word_frequency(nlp, text_list))
 
     # run nltk.download() if there are files missing
@@ -103,23 +128,48 @@ def process_nlp(videoUUID):
     # words_fd = nltk.FreqDist(txt_rm_stop)
     bigram_fd = nltk.FreqDist(nltk.bigrams(txt_rm_stop))
 
-    vocab_dict = {}
+    # **** DEPRECATED ****
+    # vocab_dict = {}
+    # counter = 0
+    # for i in doc_:
+    #     if i.pos_ == "NOUN":
+    #         if i.text in vocab_dict:
+    #             vocab_dict[f"{i.text}"]["count"] += 1
+    #         else:
+    #             counter += 1
+    #             vocab_dict[f"{i.text}"] = {"word": f"{i.text}", "count": 1}
+    # unique_dict = {}
+    # for i in doc_:
+    #     if i.lemma_ in unique_dict:
+    #         unique_dict[f"{i.lemma_}"]["count"] += 1
+    #     else:
+    #         counter += 1
+    #         # print(i.lemma_)
+    #         unique_dict[f"{i.lemma_}"] = {"word": f"{i.lemma_}", "count": 1}
+    # **************
+    vocab_dict = {
+        "total_words": 0,
+        "vocab": {},
+    }
+    vocab_dict["total_words"] = len(doc_)
     counter = 0
     for i in doc_:
-        if i.pos_ == "NOUN":
-            if i.text in vocab_dict:
-                vocab_dict[f"{i.text}"]["count"] += 1
-            else:
-                counter += 1
-                vocab_dict[f"{i.text}"] = {"word": f"{i.text}", "count": 1}
-    unique_dict = {}
-    for i in doc_:
-        if i.lemma_ in unique_dict:
-            unique_dict[f"{i.lemma_}"]["count"] += 1
+        if i.text in vocab_dict:
+            vocab_dict["vocab"][f"{i.text}"]["count"] += 1
+            print(f'before_{vocab_dict[f"{i.lemma_}"]["%"]}')
+            vocab_dict[f"{i.lemma_}"]["%"] = round(
+                (vocab_dict[f"{i.lemma_}"]["count"] / vocab_dict["total_words"]) * 100,
+                ndigits=5,
+            )
+            print(f'after_{vocab_dict[f"{i.lemma_}"]["%"]}')
         else:
             counter += 1
-            # print(i.lemma_)
-            unique_dict[f"{i.lemma_}"] = {"word": f"{i.lemma_}", "count": 1}
+            vocab_dict["vocab"][f"{i.text}"] = {
+                "word": f"{i.lemma_}",
+                "count": 1,
+                "pos": f"{i.pos_}",
+                "%": round((1 / counter) * 100, ndigits=5),
+            }
 
     keyword_ = nltk.FreqDist(txt_rm_stop).most_common(30)
     key_list = ""
@@ -151,9 +201,17 @@ def process_nlp(videoUUID):
     output_json["avg_wpm"] = avg_wpm
 
     output_json["vocab"] = vocab_dict
-    output_json["len_unique_word"] = len(unique_dict)
+    output_json["repeat_list"] = repeat_list
+    # output_json["len_unique_word"] = len(unique_dict)
     output_json["keyword"] = list(keyword_list)
-    
-    db.update(queryObj, {"latestUpdate": datetime.datetime.today().isoformat(), "status": "Done","postProcessing": output_json})
+
+    db.update(
+        queryObj,
+        {
+            "latestUpdate": datetime.datetime.today().isoformat(),
+            "status": "Done",
+            "postProcessing": output_json,
+        },
+    )
     db.close()
     return output_json

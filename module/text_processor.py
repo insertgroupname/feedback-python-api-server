@@ -37,10 +37,12 @@ def remove_punc(doc):
     return [token.text for token in doc if not token.is_punct]
 
 
-def remove_all(doc):
-    return [
-        token.lemma_ for token in doc if not (token.is_punct) and not (token.is_stop)
-    ]
+def remove_all(doc, custom_stopword=[]):
+    rm = [token.lemma_ for token in doc if not (token.is_punct) and not (token.is_stop)]
+    default_stop_list = [" "]
+    combine_stopword = [*default_stop_list, *custom_stopword]
+    rm = [t.lower() for t in rm if t not in combine_stopword]
+    return rm
 
 
 def union_text(doc1, doc2):
@@ -60,3 +62,38 @@ def calculate_word_frequency(nlp, txt_list):
     for token in doc2_:
         counts[token.lemma_] += 1
     return counts.most_common(10)  # my_keys = [key for key, val in most_common]
+
+
+def stt(sound_file):
+    import torch
+    import zipfile
+    import torchaudio
+    from omegaconf import OmegaConf
+    from glob import glob
+
+    device = torch.device(
+        "cpu"
+    )  # gpu also works, but our models are fast enough for CPU
+    model, decoder, utils = torch.hub.load(
+        repo_or_dir="snakers4/silero-models",
+        model="silero_stt",
+        language="en",  # also available 'de', 'es'
+        device=device,
+    )
+    (
+        read_batch,
+        split_into_batches,
+        read_audio,
+        prepare_model_input,
+    ) = utils  # see function signature for details
+
+    test_files = glob(sound_file)
+    batches = split_into_batches(test_files, batch_size=100)
+    input = prepare_model_input(read_batch(batches[0]), device=device)
+
+    output = model(input)
+    res_list = []
+    for example in output:
+        res_list = decoder(example.cpu())
+
+    return res_list
