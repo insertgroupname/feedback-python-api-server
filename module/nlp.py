@@ -34,7 +34,7 @@ def process_nlp(videoUUID, soundUUID):
 
     # From Pre-trained STT model;f"{path}audio/{output_filename_ogg}"
     another_stt = tp.stt(f"upload/audio/{soundUUID}")
-    repeat_list = []
+    repeat_list = {}
     prev = ""
     for i in another_stt.split():
         if i == prev:
@@ -158,7 +158,8 @@ def process_nlp(videoUUID, soundUUID):
             vocab_dict["vocab"][f"{i.text}"]["count"] += 1
             print(f'before_{vocab_dict[f"{i.lemma_}"]["%"]}')
             vocab_dict[f"{i.lemma_}"]["%"] = round(
-                (vocab_dict[f"{i.lemma_}"]["count"] / vocab_dict["total_words"]) * 100,
+                (vocab_dict[f"{i.lemma_}"]["count"] /
+                 vocab_dict["total_words"]) * 100,
                 ndigits=5,
             )
             print(f'after_{vocab_dict[f"{i.lemma_}"]["%"]}')
@@ -205,13 +206,11 @@ def process_nlp(videoUUID, soundUUID):
     # output_json["len_unique_word"] = len(unique_dict)
     output_json["keyword"] = list(keyword_list)
 
-    db.update(
-        queryObj,
-        {
-            "latestUpdate": datetime.datetime.today().isoformat(),
-            "status": "Done",
-            "postProcessing": output_json,
-        },
-    )
+    db.update(queryObj, {
+        "lastUpdate": datetime.datetime.today().isoformat(),
+        "status": "Done",
+        "report.postProcessing": output_json
+    })
+
     db.close()
     return output_json

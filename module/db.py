@@ -1,3 +1,4 @@
+from logging import error
 from typing import Dict
 from pymongo import MongoClient
 import os
@@ -8,15 +9,22 @@ load_dotenv()
 
 
 class Database:
-    def __init__(self) -> None:
-        self.client = MongoClient(
-            f"mongodb+srv://{os.environ['DB_USERNAME']}:{os.environ['DB_PASSWORD']}@cluster0.mskkl.mongodb.net/{os.environ['DB_NAME']}?retryWrites=true&w=majority"
-        )
+    def __init__(self):
+        try:
+            self.client = MongoClient(
+                f"mongodb+srv://{os.environ['DB_USERNAME']}:{os.environ['DB_PASSWORD']}@cluster0.mskkl.mongodb.net/{os.environ['DB_NAME']}?retryWrites=true&w=majority"
+            )
+        except Exception as e:
+            print(e)
 
     def update(self, queryObj: Dict, updateObj: Dict):
-        collection = self.client["DB_NAME"]["records"]
-        result = collection.update_one(queryObj, {"$set": updateObj})
-        return result
+        try:
+            collection = self.client[os.environ["DB_NAME"]]["records"]
+            result = collection.update_one(queryObj, {"$set": updateObj})
+        except Exception as e:
+            print(e)
+        finally:
+            return result
 
     def find(self, queryObj: Dict, projectionObj={}):
         collection = self.client[os.environ["DB_NAME"]]["records"]
