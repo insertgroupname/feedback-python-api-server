@@ -6,7 +6,7 @@ services:
     hostname: python-server
     volumes:
       - type: bind
-        source: ../feedback-node-server/upload
+        source: ../feedback-nest-server/upload
         target: /usr/app/upload
       
       - type: bind
