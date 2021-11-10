@@ -34,7 +34,7 @@ def process_nlp(videoUUID, soundUUID):
 
     # From Pre-trained STT model;f"{path}audio/{output_filename_ogg}"
     another_stt = tp.stt(f"upload/audio/{soundUUID}")
-    repeat_list = []
+    repeat_list = {}
     prev = ""
     for i in another_stt.split():
         if i == prev:
@@ -119,8 +119,12 @@ def process_nlp(videoUUID, soundUUID):
     nlp = spacy.load("en_core_web_lg")
     doc_ = nlp(t)
     receive_stopword = result_2[0]["stopwords"]
+
     txt_rm_stop = tp.remove_all(doc_, receive_stopword)
-    # print(tp.calculate_word_frequency(nlp, text_list))
+    rm_text = ""
+
+    for i in txt_rm_stop:
+        rm_text = rm_text + " " + i
 
     # run nltk.download() if there are files missing
     # nltk.download()
@@ -148,27 +152,31 @@ def process_nlp(videoUUID, soundUUID):
     #         unique_dict[f"{i.lemma_}"] = {"word": f"{i.lemma_}", "count": 1}
     # **************
     vocab_dict = {
-        "total_words": 0,
+        "total_vocab": 0,
         "vocab": {},
     }
-    vocab_dict["total_words"] = len(doc_)
-    counter = 0
-    for i in doc_:
-        if i.text in vocab_dict:
+
+    rm_doc = nlp(rm_text)
+    vocab_dict["total_vocab"] = len(rm_doc)
+
+    for i in rm_doc:
+        # if i not in vocab_dict.keys():
+        #     vocab_dict.update({i.pos_:1})
+
+        # vocab_dict[i.pos_] = vocab_dict[i.pos_] + 1
+        if i.text in vocab_dict and i.pos_ != "SPACE":
             vocab_dict["vocab"][f"{i.text}"]["count"] += 1
-            print(f'before_{vocab_dict[f"{i.lemma_}"]["%"]}')
-            vocab_dict[f"{i.lemma_}"]["%"] = round(
-                (vocab_dict[f"{i.lemma_}"]["count"] / vocab_dict["total_words"]) * 100,
+            vocab_dict["vocab"][f"{i.text}"]["%"] = round(
+                (vocab_dict["vocab"][f"{i.text}"]["count"] / vocab_dict["total_words"])
+                * 100,git
                 ndigits=5,
             )
-            print(f'after_{vocab_dict[f"{i.lemma_}"]["%"]}')
-        else:
-            counter += 1
+        elif i.pos_ != "SPACE":
             vocab_dict["vocab"][f"{i.text}"] = {
                 "word": f"{i.lemma_}",
                 "count": 1,
                 "pos": f"{i.pos_}",
-                "%": round((1 / counter) * 100, ndigits=5),
+                "%": round((1 / vocab_dict["total_vocab"]) * 100, ndigits=5),
             }
 
     keyword_ = nltk.FreqDist(txt_rm_stop).most_common(30)
@@ -198,7 +206,7 @@ def process_nlp(videoUUID, soundUUID):
     output_json["end_process_time"] = time.time()
     output_json["video_len"] = wpm_list[-1][2]
     output_json["total_words"] = len(wpm_list)
-    output_json["avg_wpm"] = avg_wpm
+    output_json["avg_wpm"] = round(avg_wpm, ndigits=3)
 
     output_json["vocab"] = vocab_dict
     output_json["repeat_list"] = repeat_list

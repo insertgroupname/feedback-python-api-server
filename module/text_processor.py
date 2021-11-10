@@ -42,7 +42,7 @@ def remove_all(doc, custom_stopword=[]):
     default_stop_list = [" "]
     combine_stopword = [*default_stop_list, *custom_stopword]
     rm = [t.lower() for t in rm if t not in combine_stopword]
-    return rm
+    return rm # logic ยังผิด *** 
 
 
 def union_text(doc1, doc2):
