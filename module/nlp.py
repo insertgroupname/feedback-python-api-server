@@ -105,12 +105,14 @@ def process_nlp(videoUUID, soundUUID):
     last_chunk = round((wpm_list[-1][2]), ndigits=2)
     value = 0
     hes_dict = {}
+    hes_duration = 0
     while value <= last_chunk:
         temp = value
         value += chunk
         hes_dict[f"{temp}-{value}"] = {"hes_count": 0, "words": []}
         for j, v in enumerate(wpm_list):
             if ((v[2] > temp) and (v[2] < value)) and v[0] == "%HESITATION":
+                hes_duration += v[2] - v[1]
                 hes_dict[f"{temp}-{value}"]["words"].append(v)
                 hes_dict[f"{temp}-{value}"]["hes_count"] = len(
                     hes_dict[f"{temp}-{value}"]["words"]
@@ -195,6 +197,7 @@ def process_nlp(videoUUID, soundUUID):
     output_json["hestiation_"] = {"marker": {}, "total_count": {}}
     output_json["hestiation_"]["marker"] = hes_dict
     output_json["hestiation_"]["total_count"] = hes_cnt
+    output_json["hestiation_duration"] = round(hes_duration, ndigits=4)
     output_json["word_frequency"] = {"word": {}, "bigram": {}}
     output_json["word_frequency"]["word"] = keyword_
     output_json["word_frequency"]["bigram"] = bigram_fd.most_common(10)
