@@ -168,7 +168,7 @@ def process_nlp(videoUUID, soundUUID):
             vocab_dict["vocab"][f"{i.text}"]["count"] += 1
             vocab_dict["vocab"][f"{i.text}"]["%"] = round(
                 (vocab_dict["vocab"][f"{i.text}"]["count"] / vocab_dict["total_words"])
-                * 100,git
+                * 100,
                 ndigits=5,
             )
         elif i.pos_ != "SPACE":
@@ -216,10 +216,11 @@ def process_nlp(videoUUID, soundUUID):
     db.update(
         queryObj,
         {
-            "latestUpdate": datetime.datetime.today().isoformat(),
+            "lastUpdate": datetime.datetime.today().isoformat(),
             "status": "Done",
-            "postProcessing": output_json,
+            "report.postProcessing": output_json,
         },
     )
+
     db.close()
     return output_json
