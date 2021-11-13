@@ -62,16 +62,33 @@ def process_nlp(videoUUID, soundUUID):
     avg_wpm = 0
     count_min = 0
     total = 0
-    for i in range(0, int(wpm_list[-1][2] + 1), 60):
-        wpm_dict[f"{i}-{i+60}"] = {"wpm": 0, "words": []}
-        count_min += 1
+    timer = 0
+        # assert int(wpm_list[-1][2] + 1) - timer < 60
+    while timer < int(wpm_list[-1][2] + 1):
+        plus_ = min(60,int(wpm_list[-1][2] + 1) - timer)
+        wpm_dict[f"{timer}-{timer+plus_}"] = {"wpm": 0, "words": []}
         for j, v in enumerate(wpm_list):
-            if (v[2] > i) & (v[2] < i + 60):
-                wpm_dict[f"{i}-{i+60}"]["words"].append(v)
-        wpm_dict[f"{i}-{i+60}"]["wpm"] = len(wpm_dict[f"{i}-{i+60}"]["words"])
-        total += len(wpm_dict[f"{i}-{i+60}"]["words"])
+            if timer < v[2] < timer + plus_:
+                st_ =  f"{timer}-{timer+plus_}"
+                wpm_dict[st_]["words"].append(v)
+        wpm_dict[st_]["wpm"] = len(
+            wpm_dict[st_]["words"]
+        ) if plus_ == 60 else (len(
+            wpm_dict[st_]["words"]
+        )*60)/ plus_
+        total += len(wpm_dict[st_]["words"])
+        timer += plus_
+        count_min += 1 if plus_ == 60 else round(plus_ / 60, ndigits=2)
 
-    avg_wpm = total / count_min
+
+    # print(f"minutes_count {count_min}")
+    # print(wpm_list[-1][2])
+    avg_wpm = (
+        (total / count_min)
+        if wpm_list[-1][2] > 60
+        else wpm_dict[f"0-{int(wpm_list[-1][2] + 1)}"]["wpm"]
+    )
+
 
     # Count Silence Period
     silence_dict = {"total_silence": 0, "silence_list": []}
