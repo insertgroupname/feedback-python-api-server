@@ -63,23 +63,22 @@ def process_nlp(videoUUID, soundUUID):
     count_min = 0
     total = 0
     timer = 0
-        # assert int(wpm_list[-1][2] + 1) - timer < 60
+    # assert int(wpm_list[-1][2] + 1) - timer < 60
     while timer < int(wpm_list[-1][2] + 1):
-        plus_ = min(60,int(wpm_list[-1][2] + 1) - timer)
+        plus_ = min(60, int(wpm_list[-1][2] + 1) - timer)
         wpm_dict[f"{timer}-{timer+plus_}"] = {"wpm": 0, "words": []}
         for j, v in enumerate(wpm_list):
             if timer < v[2] < timer + plus_:
-                st_ =  f"{timer}-{timer+plus_}"
+                st_ = f"{timer}-{timer+plus_}"
                 wpm_dict[st_]["words"].append(v)
-        wpm_dict[st_]["wpm"] = len(
-            wpm_dict[st_]["words"]
-        ) if plus_ == 60 else (len(
-            wpm_dict[st_]["words"]
-        )*60)/ plus_
+        wpm_dict[st_]["wpm"] = (
+            len(wpm_dict[st_]["words"])
+            if plus_ == 60
+            else (len(wpm_dict[st_]["words"]) * 60) / plus_
+        )
         total += len(wpm_dict[st_]["words"])
         timer += plus_
         count_min += 1 if plus_ == 60 else round(plus_ / 60, ndigits=2)
-
 
     # print(f"minutes_count {count_min}")
     # print(wpm_list[-1][2])
@@ -88,7 +87,6 @@ def process_nlp(videoUUID, soundUUID):
         if wpm_list[-1][2] > 60
         else wpm_dict[f"0-{int(wpm_list[-1][2] + 1)}"]["wpm"]
     )
-
 
     # Count Silence Period
     silence_dict = {"total_silence": 0, "silence_list": []}
@@ -139,7 +137,7 @@ def process_nlp(videoUUID, soundUUID):
     doc_ = nlp(t)
     receive_stopword = result_2[0]["stopwords"]
 
-    txt_rm_stop = tp.remove_all(doc_, receive_stopword)
+    txt_rm_stop, count_combine = tp.remove_all(doc_, receive_stopword)
     rm_text = ""
 
     for i in txt_rm_stop:
@@ -232,6 +230,7 @@ def process_nlp(videoUUID, soundUUID):
     output_json["repeat_list"] = repeat_list
     # output_json["len_unique_word"] = len(unique_dict)
     output_json["keyword"] = list(keyword_list)
+    output_json["custom_stopwords"] = count_combine
 
     db.update(
         queryObj,
