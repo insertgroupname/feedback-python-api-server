@@ -40,10 +40,11 @@ def remove_punc(doc):
 def remove_all(doc, custom_stopword=[]):
     default_stop_list = [" "]
     combine_stopword = [*default_stop_list, *custom_stopword]
+    rm_ = [token.lemma_ for token in doc if not (token.is_punct)]
     count_combine = list(
         set(
             [
-                (i.lemma_, combine_stopword.count(i.lemma_))
+                (i.lemma_, rm_.count(i.lemma_))
                 for i in doc
                 if i.lemma_ in combine_stopword
             ]
