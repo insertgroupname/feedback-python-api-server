@@ -38,13 +38,20 @@ def remove_punc(doc):
 
 
 def remove_all(doc, custom_stopword=[]):
-    rm = [token.lemma_ for token in doc if not (token.is_punct) and not (token.is_stop)]
     default_stop_list = [" "]
     combine_stopword = [*default_stop_list, *custom_stopword]
-    count_combine = set([(i,combine_stopword.count(i)) for i in rm])
-    count_combine = [i for i in count_combine if i[0] in combine_stopword]
+    count_combine = list(
+        set(
+            [
+                (i.lemma_, combine_stopword.count(i.lemma_))
+                for i in doc
+                if i.lemma_ in combine_stopword
+            ]
+        )
+    )
+    rm = [token.lemma_ for token in doc if not (token.is_punct) and not (token.is_stop)]
     rm = [t.lower() for t in rm if t not in combine_stopword]
-    return rm,count_combine # logic ยังผิด *** 
+    return rm, count_combine  # logic ยังผิด ***
 
 
 def union_text(doc1, doc2):
