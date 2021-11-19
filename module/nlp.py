@@ -103,8 +103,10 @@ def process_nlp(videoUUID, soundUUID):
                     "silence_start": v[2],
                     "silence_end": wpm_list[i + 1][1],
                 }
+                silence_list.append(e)
+            else:
+                pass
             silence_duration_count += silence_time
-            silence_list.append(e)
 
     # hestiation_marker = {}
     # for i in range(0, int(wpm_list[-1][2] + 1), 10):
