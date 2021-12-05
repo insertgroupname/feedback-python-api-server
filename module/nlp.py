@@ -17,7 +17,7 @@ def process_nlp(videoUUID, soundUUID):
     db.update(
         queryObj,
         {
-            "latestUpdate": datetime.datetime.today().isoformat(),
+            "lastUpdate": datetime.datetime.today().isoformat(),
             "status": "processing_nlp",
         },
     )
