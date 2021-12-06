@@ -108,32 +108,38 @@ def process_nlp(videoUUID, soundUUID):
                 pass
             silence_duration_count += silence_time
 
-    # hestiation_marker = {}
-    # for i in range(0, int(wpm_list[-1][2] + 1), 10):
-    #     hestiation_marker[f"{i}-{i+10.0}"] = {"hes_count": 0, "words": []}
-    #     for j, v in enumerate(wpm_list):
-    #         if ((v[2] > i) and (v[2] < i + 10.0)) and v[0] == "%HESITATION":
-    #             hestiation_marker[f"{i}-{i+10.0}"]["words"].append(v)
-    #             hestiation_marker[f"{i}-{i+10.0}"]["hes_count"] = len(
-    #                 hestiation_marker[f"{i}-{i+10.0}"]["words"]
-    #             )
 
-    chunk = round((wpm_list[-1][2]) / 10, ndigits=2)
-    last_chunk = round((wpm_list[-1][2]), ndigits=2)
-    value = 0
-    hes_dict = {}
-    hes_duration = 0
-    while value <= last_chunk:
-        temp = value
-        value += chunk
-        hes_dict[f"{temp}-{value}"] = {"hes_count": 0, "words": []}
+    # chunk = round((wpm_list[-1][2]) / 10, ndigits=2)
+    # last_chunk = round((wpm_list[-1][2]), ndigits=2)
+    # value = 0
+    # hes_dict = {}
+    # hes_duration = 0
+    # while value <= last_chunk:
+    #     temp = value
+    #     value += chunk
+    #     hes_dict[f"{temp}-{value}"] = {"hes_count": 0, "words": []}
+    #     for j, v in enumerate(wpm_list):
+    #         if ((v[2] > temp) and (v[2] < value)) and v[0] == "%HESITATION":
+    #             hes_duration += v[2] - v[1]
+    #             hes_dict[f"{temp}-{value}"]["words"].append(v)
+    #             hes_dict[f"{temp}-{value}"]["hes_count"] = len(
+    #                 hes_dict[f"{temp}-{value}"]["words"]
+    #             )
+    timer_hes = 0
+    hes_dict_2 = {}
+    hes_duration_2 = 0
+    while timer_hes < int(wpm_list[-1][2] + 1):
+        plus_timer = min(60, int(wpm_list[-1][2] + 1) - timer_hes)
+        hes_dict_2[f"{timer_hes}-{timer_hes+plus_timer}"] = {"hes_count": 0, "words": []}
         for j, v in enumerate(wpm_list):
-            if ((v[2] > temp) and (v[2] < value)) and v[0] == "%HESITATION":
-                hes_duration += v[2] - v[1]
-                hes_dict[f"{temp}-{value}"]["words"].append(v)
-                hes_dict[f"{temp}-{value}"]["hes_count"] = len(
-                    hes_dict[f"{temp}-{value}"]["words"]
-                )
+            if (timer_hes < v[2] < timer_hes + plus_timer) and v[0] == "%HESITATION":
+                st_ = f"{timer_hes}-{timer_hes+plus_timer}"
+                hes_duration_2 += v[2] - v[1]
+                hes_dict_2[st_]["words"].append(v)
+                hes_dict_2[st_]["hes_count"] = len(hes_dict_2[st_]["words"])
+        timer_hes += plus_timer
+
+
 
     nlp = spacy.load("en_core_web_lg")
     doc_ = nlp(t)
@@ -212,9 +218,9 @@ def process_nlp(videoUUID, soundUUID):
                     keyword_list.add(i.lemma_)
 
     output_json["hestiation_"] = {"marker": {}, "total_count": {}}
-    output_json["hestiation_"]["marker"] = hes_dict
+    output_json["hestiation_"]["marker"] = hes_dict_2
     output_json["hestiation_"]["total_count"] = hes_cnt
-    output_json["hestiation_duration"] = round(hes_duration, ndigits=4)
+    output_json["hestiation_duration"] = round(hes_duration_2, ndigits=4)
     output_json["word_frequency"] = {"word": {}, "bigram": {}}
     output_json["word_frequency"]["word"] = keyword_
     output_json["word_frequency"]["bigram"] = bigram_fd.most_common(10)
