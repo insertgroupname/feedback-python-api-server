@@ -8,7 +8,7 @@ def process_transcript(videoUUID: str, soundUUID: str):
     try:
         db = Database()
         queryObj = {"videoUUID": videoUUID}
-        db.update(queryObj, {"latestUpdate": datetime.datetime.today(
+        db.update(queryObj, {"lastUpdate": datetime.datetime.today(
         ).isoformat(), "status": "processing_transcript"})
     except (error):
         print(error)
@@ -18,6 +18,6 @@ def process_transcript(videoUUID: str, soundUUID: str):
     updateResult = db.update(
         queryObj, {'report.transcript': sttResult["results"]})
     db.update(
-        queryObj, {"latestUpdate": datetime.datetime.today().isoformat()})
+        queryObj, {"lastUpdate": datetime.datetime.today().isoformat()})
     db.close()
     return updateResult
