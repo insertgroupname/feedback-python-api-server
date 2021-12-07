@@ -12,7 +12,7 @@ class Database:
     def __init__(self):
         try:
             self.client = MongoClient(
-                f"mongodb+srv://{os.environ['DB_USERNAME']}:{os.environ['DB_PASSWORD']}@cluster0.mskkl.mongodb.net/{os.environ['DB_NAME']}?retryWrites=true&w=majority"
+                f"mongodb+srv://{os.environ['DB_USERNAME']}:{os.environ['DB_PASSWORD']}@{os.environ['DB_CLUSTER_URL']}/{os.environ['DB_NAME']}?retryWrites=true&w=majority"
             )
         except Exception as e:
             print(e)
