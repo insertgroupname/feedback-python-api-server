@@ -241,7 +241,7 @@ def process_nlp(videoUUID, soundUUID):
     output_json["repeat_list"] = repeat_list
     # output_json["len_unique_word"] = len(unique_dict)
     output_json["keyword"] = list(keyword_list)
-    output_json["keyword"] = keyword_gen
+    output_json["keyword_gen"] = keyword_gen
     output_json["custom_stopwords"] = count_combine
 
     db.update(
