@@ -9,7 +9,7 @@ import module.text_processor as tp
 import time
 from module.db import Database
 import datetime
-
+from rake_nltk import Rake
 
 def process_nlp(videoUUID, soundUUID):
     db = Database()
@@ -216,6 +216,9 @@ def process_nlp(videoUUID, soundUUID):
             if (i.pos_ == "NOUN" and j.pos_ == "NOUN") and i.text != j.text:
                 if i.similarity(j) > 0.5 and i.similarity(j) != 1.0:
                     keyword_list.add(i.lemma_)
+    r = Rake(min_length=2, max_length=4,stopwords=nlp.Defaults.stop_words)
+    r.extract_keywords_from_text(t)
+    keyword_gen = list(r.get_ranked_phrases_with_scores())
 
     output_json["hestiation_"] = {"marker": {}, "total_count": {}}
     output_json["hestiation_"]["marker"] = hes_dict_2
@@ -238,6 +241,7 @@ def process_nlp(videoUUID, soundUUID):
     output_json["repeat_list"] = repeat_list
     # output_json["len_unique_word"] = len(unique_dict)
     output_json["keyword"] = list(keyword_list)
+    output_json["keyword"] = keyword_gen
     output_json["custom_stopwords"] = count_combine
 
     db.update(
