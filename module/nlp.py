@@ -216,6 +216,8 @@ def process_nlp(videoUUID, soundUUID):
             if (i.pos_ == "NOUN" and j.pos_ == "NOUN") and i.text != j.text:
                 if i.similarity(j) > 0.5 and i.similarity(j) != 1.0:
                     keyword_list.add(i.lemma_)
+    
+    nltk.download('punkt')
     r = Rake(min_length=2, max_length=4,stopwords=nlp.Defaults.stop_words)
     r.extract_keywords_from_text(t)
     keyword_gen = list(r.get_ranked_phrases_with_scores())
